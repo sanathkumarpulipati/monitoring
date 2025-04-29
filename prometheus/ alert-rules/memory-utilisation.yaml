@@ -1,0 +1,12 @@
+groups:
+- name: Memory-Utilisation-Alert
+  rules:
+  # Critical Alert: Memory Utilization above 85%
+  - alert: Memory-Utilisation-Critical
+    expr: 100 - ((node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100) > 85
+    for: 5m
+    labels:
+      severity: 'critical'
+    annotations:
+      summary: "{{ $labels.job }}-{{ $labels.instance }} memory utilization more than 85%. Current value is {{ $value }}%."
+
