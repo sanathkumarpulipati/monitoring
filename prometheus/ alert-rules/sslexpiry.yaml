@@ -1,0 +1,32 @@
+groups:
+- name: ssl_expiry
+  rules:
+  - alert: SSLCertExpiringIn60Days
+    expr: probe_ssl_earliest_cert_expiry{job="blackbox"} - time() < 86400 * 60  # 60 days
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "SSL certificate for {{ $labels.instance }} is expiring soon (within 60 days)"
+      description: |
+        The SSL certificate for {{ $labels.instance }} will expire in less than 60 days.        
+
+  - alert: SSLCertExpiringIn30Days
+    expr: probe_ssl_earliest_cert_expiry{job="blackbox"} - time() < 86400 * 30  # 30 days
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "SSL certificate for {{ $labels.instance }} is expiring soon (within 30 days)"
+      description: |
+        The SSL certificate for {{ $labels.instance }} will expire in less than 30 days.        
+
+  - alert: SSLCertExpiringIn10Days
+    expr: probe_ssl_earliest_cert_expiry{job="blackbox"} - time() < 86400 * 10  # 10 days
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "SSL certificate for {{ $labels.instance }} is expiring very soon (within 10 days)"
+      description: |
+        The SSL certificate for {{ $labels.instance }} will expire in less than 10 days.        
