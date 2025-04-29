@@ -1,0 +1,50 @@
+groups:
+- name: persistent_volume.rules
+  rules:
+  - alert: PersistentVolumeUsageCritical
+    expr: |
+      sum by (namespace, persistentvolumeclaim, job, instance) (
+        kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes * 100 > 85
+      )      
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "PV Usage Critical for {{ $labels.persistentvolumeclaim }} (Job: {{ $labels.job }})"
+      description: "PersistentVolume usage for {{ $labels.persistentvolumeclaim }} in namespace {{ $labels.namespace }} on instance {{ $labels.instance }} is at {{ $value | humanizePercentage }}"
+
+  - alert: PersistentVolumeUsageWarning
+    expr: |
+      sum by (namespace, persistentvolumeclaim, job, instance) (
+        kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes * 100 > 75
+      )      
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "PV Usage Warning for {{ $labels.persistentvolumeclaim }} (Job: {{ $labels.job }})"
+      description: "PersistentVolume usage for {{ $labels.persistentvolumeclaim }} in namespace {{ $labels.namespace }} on instance {{ $labels.instance }} is at {{ $value | humanizePercentage }}"
+
+  - alert: PersistentVolumeFailed
+    expr: |
+      sum by (persistentvolume, job, instance) (
+        kube_persistentvolume_status_phase{phase=~"Failed"} == 1
+      )      
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "PV Failed: {{ $labels.persistentvolume }} (Job: {{ $labels.job }})"
+      description: "PersistentVolume {{ $labels.persistentvolume }} on instance {{ $labels.instance }} is in Failed state"
+
+  - alert: PersistentVolumePending
+    expr: |
+      sum by (persistentvolume, job, instance) (
+        kube_persistentvolume_status_phase{phase=~"Pending"} == 1
+      )      
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "PV Pending: {{ $labels.persistentvolume }} (Job: {{ $labels.job }})"
+      description: "PersistentVolume {{ $labels.persistentvolume }} on instance {{ $labels.instance }} has been in Pending state for more than 5 minutes"
