@@ -1,0 +1,39 @@
+groups:
+  - name: system_alerts
+    rules:
+      # Low Memory Alert for All Jobs
+      - alert: LowMemory
+        expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 > 15
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          job: "{{ $labels.job }}"
+          host: "{{ $labels.instance }}"
+          summary: "{{ $labels.instance }} (job: {{ $labels.job }}) host is low on memory. Only {{ $value }}% left"
+          description: "Host {{ $labels.instance }} (job: {{ $labels.job }}) is low on memory. Only {{ $value }}% left"
+
+      # High CPU Usage Alert for All Jobs
+      - alert: HighCPUUsage
+        expr: (1 - avg(irate(node_cpu_seconds_total{mode="idle"}[5m])) by (instance, job)) * 100 > 10
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          job: "{{ $labels.job }}"
+          host: "{{ $labels.instance }}"
+          summary: "{{ $labels.instance }} (job: {{ $labels.job }}) host CPU usage is high. Current usage: {{ $value }}%"
+          description: "Host {{ $labels.instance }} (job: {{ $labels.job }}) CPU usage is above 10%. Current usage: {{ $value }}%"
+
+      # High Disk Usage Alert for All Jobs
+      - alert: HighDiskUsage
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 50
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          job: "{{ $labels.job }}"
+          host: "{{ $labels.instance }}"
+          summary: "{{ $labels.instance }} (job: {{ $labels.job }}) host disk usage is high. Available disk space: {{ $value }}%"
+          description: "Host {{ $labels.instance }} (job: {{ $labels.job }}) disk usage is above 50%. Available disk space: {{ $value }}%"
+
