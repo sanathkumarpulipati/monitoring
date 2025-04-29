@@ -1,0 +1,11 @@
+groups:
+- name: Disk-Utilisation-Alert
+  rules:
+  # Critical Alert: Disk Utilization above 85%
+  - alert: Disk-Utilisation-Critical
+    expr: 100 - ((node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100) > 85
+    for: 5m
+    labels:
+      severity: 'critical'
+    annotations:
+      summary: "Disk usage on {{ $labels.job }}-{{ $labels.instance }} ({{ $labels.fstype }}) has exceeded 85%. Current value is {{ $value }}%."
