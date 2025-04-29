@@ -1,0 +1,26 @@
+groups:
+- name: pod.rules
+  rules:
+  - alert: PodImagePullBackOff
+    expr: |
+      sum by (namespace, pod, container, job, instance) (
+        kube_pod_container_status_waiting_reason{reason="ImagePullBackOff"}
+      ) > 0      
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Container {{ $labels.container }} in Pod {{ $labels.pod }} has ImagePullBackOff (Job: {{ $labels.job }})"
+      description: "Container {{ $labels.container }} in Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} on instance {{ $labels.instance }} has been unable to pull its image for more than 2 minutes"
+
+  - alert: PodErrImagePull
+    expr: |
+      sum by (namespace, pod, container, job, instance) (
+        kube_pod_container_status_waiting_reason{reason="ErrImagePull"}
+      ) > 0      
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Container {{ $labels.container }} in Pod {{ $labels.pod }} has ErrImagePull (Job: {{ $labels.job }})"
+      description: "Container {{ $labels.container }} in Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} on instance {{ $labels.instance }} encountered error while pulling image"
