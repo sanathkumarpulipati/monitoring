@@ -1,0 +1,12 @@
+groups:
+- name: CPU-Utilisation-Alert
+  rules:
+  # Critical Alert: CPU Utilization > 85%
+  - alert: CPU-Utilisation-Critical
+    expr: 100 - (avg by (instance, job) (rate(node_cpu_seconds_total{mode="idle"}[5m]) * 100)) > 85
+    for: 5m
+    labels:
+      severity: 'critical'
+    annotations:
+      summary: "{{ $labels.job }}-{{ $labels.instance }} CPU utilizing more than 85. Current value is {{ $value }}%."
+
