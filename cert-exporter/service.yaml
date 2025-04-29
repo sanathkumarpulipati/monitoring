@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: x509-certificate-exporter
+  namespace: kube-system
+spec:
+  selector:
+    app: x509-certificate-exporter
+  ports:
+    - protocol: TCP
+      port: 9793
+      targetPort: 9793
+      nodePort: 30097
+  type: NodePort
