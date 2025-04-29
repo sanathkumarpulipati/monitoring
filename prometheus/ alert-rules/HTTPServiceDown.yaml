@@ -1,0 +1,12 @@
+groups:
+- name: site_availability.rules
+  rules:
+  - alert: HTTPServiceDown
+    expr: |
+      (probe_http_status_code != 200 and probe_http_status_code > 0) and probe_success == 0      
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "HTTP Service Down - {{ $labels.instance }} (Job: {{ $labels.job }})"
+      description: "HTTP service at {{ $labels.instance }} is returning status code {{ $value }} for more than 2 minutes"
