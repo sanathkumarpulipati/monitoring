@@ -1,0 +1,955 @@
+global:
+  scrape_interval: 15s  # Global default scrape interval
+  external_labels:
+    monitor: 'Prometheus-alert'  # External label for identification
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 'localhost:9093'  # Address of the Alertmanager instance
+
+rule_files:
+  - 'alert-rules/*.yaml'  # File containing alert rules
+  # Uncomment and add more rule files if needed
+
+scrape_configs:
+  # Scraping Prometheus itself
+  - job_name: 'prometheus'
+    scrape_interval: 5s  # More frequent scraping for Prometheus metrics
+    static_configs:
+      - targets:
+          - 'localhost:9090'
+
+  # Scraping Certificates Explorer
+  - job_name: 'x509-certs-expiry-DEV-shared'
+    static_configs:
+      - targets:
+          - '192.168.61.131:30092'
+
+  # Scraping Certificates Explorer
+  - job_name: 'x509-certs-expiry-QA-shared'
+    static_configs:
+      - targets:
+          - '192.168.61.119:30993'
+
+  # Scraping Certificates Explorer
+  - job_name: 'x509-certs-expiry-Acq-qa-kmaster'
+    static_configs:
+      - targets:
+          - '192.168.61.60:30092'
+
+  # Scraping Certificates Explorer
+  - job_name: 'x509-certs-expiry-Acq-dev-kmaster'
+    static_configs:
+      - targets:
+          - '192.168.61.56:30093'
+
+  # Scraping Certificates Explorer
+  - job_name: 'x509-certs-expiry-perf-acq-kmaster'
+    static_configs:
+      - targets:
+          - '192.168.61.67:30094'
+
+  # Scraping Certificates Explorer
+  - job_name: 'x509-certs-expiry-psp-sale-kmaster'
+    static_configs:
+      - targets:
+          - '192.168.61.95:30092'
+
+  # Scraping Certificates Explorer
+  - job_name: 'x509-certs-expiry-acq-new-kmaster'
+    static_configs:
+      - targets:
+          - '192.168.63.55:30095'
+
+  # Scraping Certificates Explorer
+  - job_name: 'x509-certs-expiry-acq-kmaster(lyra)'
+    static_configs:
+      - targets:
+          - '192.168.61.30:30096'
+
+  # # Scraping Certificates Explorer
+  # - job_name: 'x509-certs-expiry-psp-dev-kmaster'
+  #   static_configs:
+  #     - targets:
+  #         - '192.168.63.152:30097'
+
+  # Scraping Certificates Explorer
+  - job_name: 'x509-certs-expiry-psp-qa-kmaster'
+    static_configs:
+      - targets:
+          - '192.168.63.156:30098'
+
+  # # Scraping Certificates Explorer
+  # - job_name: 'x509-certs-expiry-Dev-switch-kmaster'
+  #   static_configs:
+  #     - targets:
+  #         - '192.168.63.135:30099'
+
+  # # Scraping Certificates Explorer
+  # - job_name: 'x509-certs-expiry-qa-switch-kmaster '
+  #   static_configs:
+  #     - targets:
+  #         - '192.168.63.138:30091'
+
+  # Scraping External Grafana Server
+  - job_name: 'external-grafana-server'
+    static_configs:
+      - targets:
+          - '192.168.61.186:9200'
+
+  - job_name: 'windows-exporter'
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - '192.168.61.42:9182'
+
+            #  - job_name: 'snmp_memory'
+            #  metrics_path: /snmp
+            #  static_configs:
+            # - targets:
+            #    - '192.168.63.250'  # SNMP exporter host and port
+    params:
+      module: [memory]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: job
+        replacement: 'snmp_memory'
+
+  # MongoDB exporter
+
+
+  - job_name: 'mongodb-01(perf)'
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - '192.168.61.38:9216'
+          - '192.168.61.39:9216'
+          - '192.168.61.68:9216'
+
+  - job_name: 'Mongo'
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - '192.168.61.165:9216'
+          - '192.168.61.73:9216'
+  # Scraping kube-state-metrics
+
+  - job_name: 'k8s-kube-state-QA-shared'
+    honor_timestamps: true
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets: ['192.168.61.119:30080']
+    metric_relabel_configs:
+      - target_label: cluster
+        replacement: k8s-kube-state-QA-shared
+
+  - job_name: 'kube-state-metrics-DEV-shared'
+    honor_timestamps: true
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets: ['192.168.61.131:30089']
+    metric_relabel_configs:
+      - target_label: cluster
+        replacement: kube-state-metrics-DEV-shared
+
+
+  - job_name: 'Acq-qa-Kmaster-kube-state'
+    honor_timestamps: true
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets: ['192.168.61.60:30501']
+    metric_relabel_configs:
+      - target_label: cluster
+        replacement: Acq-qa-Kmaster-kube-state
+
+
+  - job_name: 'Acq-dev-Kmaster-kube-state'
+    honor_timestamps: true
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets: ['192.168.61.56:30501']
+    metric_relabel_configs:
+      - target_label: cluster
+        replacement: Acq-dev-Kmaster-kube-state
+
+
+  - job_name: 'psp-sale-Kmaster-kube-state'
+    honor_timestamps: true
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets: ['192.168.61.95:30089']
+    metric_relabel_configs:
+      - target_label: cluster
+        replacement: psp-sale-Kmaster-kube-state
+
+
+
+  - job_name: 'Perf-acq-Kmaster-kube-state'
+    honor_timestamps: true
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets: ['192.168.61.67:30501']
+    metric_relabel_configs:
+      - target_label: cluster
+        replacement: Perf-acq-Kmaster-kube-state
+
+  - job_name: 'Acq-new-Kmaster-kube-state'
+    honor_timestamps: true
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets: ['192.168.63.55:30501']
+    metric_relabel_configs:
+      - target_label: cluster
+        replacement: Acq-new-Kmaster-kube-state
+
+  - job_name: 'lyra-Kmaster-kube-state'
+    honor_timestamps: true
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets: ['192.168.61.30:30501']
+    metric_relabel_configs:
+      - target_label: cluster
+        replacement: lyra-Kmaster-kube-state
+
+
+  # - job_name: 'PSP-dev-Kmaster-kube-state'
+  #   honor_timestamps: true
+  #   metrics_path: /metrics
+  #   scheme: http
+  #   static_configs:
+  #     - targets: ['192.168.63.152:30501']
+  #   metric_relabel_configs:
+  #     - target_label: cluster
+  #       replacement: PSP-dev-Kmaster-kube-state
+
+
+  - job_name: 'PSP-qa-Kmaster-kube-state'
+    honor_timestamps: true
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets: ['192.168.63.156:30501']
+    metric_relabel_configs:
+      - target_label: cluster
+        replacement: PSP-qa-Kmaster-kube-state
+
+
+ 
+
+
+  # - job_name: 'kube-state-metrics-QA-Shared'
+  #   metrics_path: /metrics
+  #   static_configs:
+  #     - targets:
+  #         - '192.168.61.119:30080'  # Replace with your kube-state-metrics service address
+
+  # - job_name: 'cadvisor-QA-Shared'
+  #   metrics_path: '/containers'
+  #   static_configs:
+  #     - targets: ['192.168.61.119:31000']
+
+
+
+  # - job_name: 'kube-state-metrics-DEV-shared'
+  #   metrics_path: /metrics
+  #   static_configs:
+  #     - targets:
+  #         - '192.168.61.131:30089'  # Replace with your kube-state-metrics service address
+
+  # - job_name: 'Acq-qa-Kmaster-kube-state'
+  #   metrics_path: /metrics
+  #   static_configs:
+  #     - targets:
+  #         - '192.168.61.60:30501'  # Replace with your kube-state-metrics service address
+
+  # - job_name: 'Acq-dev-Kmaster-kube-state'
+  #   metrics_path: /metrics
+  #   static_configs:
+  #     - targets:
+  #         - '192.168.61.56:30501'  # Replace with your kube-state-metrics service address
+
+  # - job_name: 'Perf-acq-Kmaster-kube-state'
+  #   metrics_path: /metrics
+  #   static_configs:
+  #     - targets:
+  #         - '192.168.61.67:30501'  # Replace with your kube-state-metrics service address
+
+  # - job_name: 'Acq-new-Kmaster-kube-state'
+  #   metrics_path: /metrics
+  #   static_configs:
+  #     - targets:
+  #         - '192.168.63.55:30501'  # Replace with your kube-state-metrics service address
+
+  # - job_name: 'lyra-Kmaster-kube-state'
+  #   metrics_path: /metrics
+  #   static_configs:
+  #     - targets:
+  #         - '192.168.61.30:30501'  # Replace with your kube-state-metrics service address
+
+  # - job_name: 'PSP-dev-Kmaster-kube-state'
+  #   metrics_path: /metrics
+  #   static_configs:
+  #     - targets:
+  #         - '192.168.63.152:30501'  # Replace with your kube-state-metrics service address
+
+  # - job_name: 'PSP-qa-Kmaster-kube-state'
+  #   metrics_path: /metrics
+  #   static_configs:
+  #     - targets:
+  #         - '192.168.63.156:30501'  # Replace with your kube-state-metrics service address
+
+  # Node exporter
+  - job_name: 'elasticsearch'
+    static_configs:
+      - targets:
+          - '192.168.61.191:9200'
+
+  - job_name: 'kafka'
+    static_configs:
+      - targets:
+          - '192.168.61.190:9200'
+
+  - job_name: 'kibana'
+    static_configs:
+      - targets:
+          - '192.168.61.96:9200'
+  - job_name: 'nexus-reg'
+    static_configs:
+      - targets:
+        - '192.168.61.125:9200'
+
+  - job_name: 'node_exporter'
+    file_sd_configs:
+      - files:
+          - '/etc/prometheus/targets.yaml'
+
+  - job_name: 'perf-acq-batch'
+    static_configs:
+      - targets:
+          - '192.168.61.71:9200'
+  - job_name: 'perf-jenkins'
+    static_configs:
+      - targets:
+          - '192.168.61.78:9200'
+  - job_name: 'perf-swi-batch'
+    static_configs:
+      - targets:
+          - '192.168.61.85:9200'
+  - job_name: 'perf-switch-kmaster'
+    static_configs:
+      - targets:
+          - '192.168.61.82:9200'
+  - job_name: 'perf-switch-kworker2'
+    static_configs:
+      - targets:
+          - '192.168.61.84:9200'
+  - job_name: 'switch-jenkins'
+    static_configs:
+      - targets:
+          - '192.168.61.33:9200'
+  - job_name: 'switch-qa-batch'
+    static_configs:
+      - targets:
+          - '192.168.61.65:9200'
+  - job_name: 'toucan-git'
+    static_configs:
+      - targets:
+          - '192.168.61.88:9200'
+  - job_name: 'utility-tc'
+    static_configs:
+      - targets:
+          - '192.168.61.36:9200'
+  - job_name: 'vcip-kmaster'
+    static_configs:
+      - targets:
+          - '192.168.61.80:9200'
+  - job_name: 'vcip-kworker1'
+    static_configs:
+      - targets:
+          - '192.168.61.81:9200'
+  - job_name: 'vcip-kworker2'
+    static_configs:
+      - targets:
+          - '192.168.63.113:9200'
+  - job_name: 'acq-dev-kworker2'
+    static_configs:
+      - targets:
+          - '192.168.61.63:9200'
+  - job_name: 'acq-dev-kworker1'
+    static_configs:
+      - targets:
+          - '192.168.61.62:9200'
+            # - job_name: 'CandS-switch'
+            # static_configs:
+            #      - targets:
+            # - '192.168.63.107:9200'
+  - job_name: 'lyra-jenkins'
+    static_configs:
+      - targets:
+          - '192.168.63.164:9200'
+  - job_name: 'ebt-jenkins'
+    static_configs:
+      - targets:
+          - '192.168.63.168:9200'
+  - job_name: 'ebt-d-kmaster'
+    static_configs:
+      - targets:
+          - '192.168.63.100:9200'
+  - job_name: 'ebt-d-kworker1'
+    static_configs:
+      - targets:
+          - '192.168.63.101:9200'
+  - job_name: 'ebt-d-kworker2'
+    static_configs:
+      - targets:
+          - '192.168.63.102:9200'
+  - job_name: 'ebt-d-batch'
+    static_configs:
+      - targets:
+          - '192.168.63.104:9200'
+  - job_name: 'jenkins-slave1'
+    static_configs:
+      - targets:
+          - '192.168.61.172:9200'
+  - job_name: 'jenkins-slave2'
+    static_configs:
+      - targets:
+          - '192.168.61.173:9200'
+  - job_name: 'ict'
+    static_configs:
+      - targets:
+          - '192.168.61.179:9200'
+  - job_name: 'datalake-qa-kworker1'
+    static_configs:
+      - targets:
+          - '192.168.63.187:9200'
+  - job_name: 'data-lake-qa-kworker2'
+    static_configs:
+      - targets:
+          - '192.168.63.188:9200'
+  - job_name: 'datalake-qa-kmaster'
+    static_configs:
+      - targets:
+          - '192.168.63.186:9200'
+  - job_name: 'minio'
+    static_configs:
+      - targets:
+          - '192.168.63.185:9200'
+  - job_name: 'k8s-master'
+    static_configs:
+      - targets:
+          - '192.168.63.126:9200'
+  - job_name: 'k8s-worker'
+    static_configs:
+      - targets:
+          - '192.168.63.167:9200'
+  - job_name: 'master-slave-jenkins'
+    static_configs:
+      - targets:
+          - '192.168.63.78:9200'
+  - job_name: 'pop-demo'
+    static_configs:
+      - targets:
+          - '192.168.61.184:9200'
+  - job_name: 'lyra-batch'
+    static_configs:
+      - targets:
+          - '192.168.63.180:9200'
+  - job_name: 'solrcluster1'
+    static_configs:
+      - targets:
+          - '192.168.63.181:9200'
+  - job_name: 'solrcluster2'
+    static_configs:
+      - targets:
+          - '192.168.63.182:9200'
+  - job_name: 'solrcluster3'
+    static_configs:
+      - targets:
+          - '192.168.63.183:9200'
+  - job_name: 'vcip-turn'
+    static_configs:
+      - targets:
+          - '192.168.63.184:9200'
+  - job_name: 'psp-qa-kworker2'
+    static_configs:
+      - targets:
+          - '192.168.63.158:9200'
+  - job_name: 'psp-qa-kworker1'
+    static_configs:
+      - targets:
+          - '192.168.63.157:9200'
+  - job_name: 'psp-qa-kmaster'
+    static_configs:
+      - targets:
+          - '192.168.63.156:9200'
+  - job_name: 'psp-qa-batch'
+    static_configs:
+      - targets:
+          - '192.168.63.159:9200'
+  - job_name: 'perf-acq-kmaster'
+    static_configs:
+      - targets:
+          - '192.168.61.67:9200'
+  - job_name: 'perf-acq-kworker1'
+    static_configs:
+      - targets:
+          - '192.168.61.69:9200'
+  - job_name: 'perf-acq-kworker2'
+    static_configs:
+      - targets:
+          - '192.168.61.70:9200'
+  - job_name: 'acq-new-kmaster'
+    static_configs:
+      - targets:
+          - '192.168.63.55:9200'
+  - job_name: 'acq-new-kworker1'
+    static_configs:
+      - targets:
+          - '192.168.63.56:9200'
+            # - job_name: 'poc-performance'
+            # static_configs:
+            # - targets:
+            # - '192.168.63.60:9200'
+  - job_name: 'passive-master'
+    static_configs:
+      - targets:
+          - '192.168.63.79:9200'
+  - job_name: 'qa-shared-master'
+    static_configs:
+      - targets:
+          - '192.168.61.119:9200'
+  - job_name: 'qa-shared-kworker1'
+    static_configs:
+      - targets:
+          - '192.168.61.120:9200'
+  - job_name: 'qa-shared-kworker2'
+    static_configs:
+      - targets:
+          - '192.168.61.121:9200'
+  - job_name: 'Switch-dev-batch'
+    static_configs:
+      - targets:
+          - '192.168.63.52:9200'
+            # - job_name: 'j-meter'
+            # static_configs:
+            # - targets:
+            #   - '192.168.63.61:9200'
+  - job_name: 'acq-dev-batch'
+    static_configs:
+      - targets:
+          - '192.168.61.61:9200'
+  - job_name: 'acq-qa-batch'
+    static_configs:
+      - targets:
+          - '192.168.61.76:9200'
+  - job_name: 'V-cip'
+    static_configs:
+      - targets:
+          - '192.168.63.103:9200'
+  - job_name: 'perf-nfs'
+    static_configs:
+      - targets:
+          - '192.168.63.143:9200'
+  - job_name: 'postgresql-db'
+    static_configs:
+      - targets:
+          - '192.168.61.51:9200'
+  - job_name: 'acq-solr'
+    static_configs:
+      - targets:
+        - '192.168.63.92:9200'
+  - job_name: 'acq-qa-master'
+    static_configs:
+      - targets:
+        - '192.168.61.60:9200'
+  - job_name: 'artifacts'
+    static_configs:
+      - targets:
+        - '192.168.61.50:9200'
+          # - job_name: 'Issuer-Kmaster'
+          #   static_configs:
+          #    - targets:
+          #  - '192.168.63.75:9200'
+          # - job_name: 'issuing-jenkins'
+          # static_configs:
+          #   - targets:
+          # - '192.168.63.82:9200'
+  - job_name: 'acq-qa-worker1'
+    static_configs:
+      - targets:
+        - '192.168.61.58:9200'
+  - job_name: 'acq-kmaster(lyra)'
+    static_configs:
+      - targets:
+        - '192.168.61.30:9200'
+  - job_name: 'acq-worker(lyra)'
+    static_configs:
+      - targets:
+        - '192.168.61.31:9200'
+  - job_name: 'psp-dev-batch'
+    static_configs:
+      - targets:
+        - '192.168.63.155:9200'
+  - job_name: 'psp-dev-jenkins'
+    static_configs:
+      - targets:
+        - '192.168.63.165:9200'
+  - job_name: 'psp-dev-kmaster'
+    static_configs:
+      - targets:
+        - '192.168.63.152:9200'
+  - job_name: 'psp-dev-kmaster1'
+    static_configs:
+      - targets:
+        - '192.168.63.153:9200'
+  - job_name: 'Qa-mongo-1'
+    static_configs:
+      - targets:
+        - '192.168.63.109:9200'
+  - job_name: 'Qa-mongo-2'
+    static_configs:
+      - targets:
+        - '192.168.63.110:9200'
+  - job_name: 'Qa-mongo-3'
+    static_configs:
+      - targets:
+        - '192.168.63.111:9200'
+  - job_name: 'Dev-shared-kmaster'
+    static_configs:
+      - targets:
+        - '192.168.61.131:9200'
+  - job_name: 'Dev-shared-kworker1'
+    static_configs:
+      - targets:
+        - '192.168.61.132:9200'
+  - job_name: 'Dev-shared-kworker2'
+    static_configs:
+      - targets:
+        - '192.168.61.133:9200'
+  - job_name: 'sftp'
+    static_configs:
+      - targets:
+        - '192.168.61.112:9200'
+  - job_name: 'Dev-shared-Database'
+    static_configs:
+      - targets:
+        - '192.168.61.165:9200'
+  - job_name: 'mongodb-03'
+    static_configs:
+      - targets:
+        - '192.168.61.68:9200'
+  - job_name: 'mongodb-01'
+    static_configs:
+      - targets:
+        - '192.168.61.38:9200'
+  - job_name: 'mongodb-02'
+    static_configs:
+      - targets:
+        - '192.168.61.39:9200'
+  - job_name: 'Tc-solar-1'
+    static_configs:
+      - targets:
+        - '192.168.61.45:9200'
+  - job_name: 'Tc-solar-2'
+    static_configs:
+      - targets:
+        - '192.168.61.46:9200'
+  - job_name: 'SonarCube'
+    static_configs:
+      - targets:
+        - '192.168.63.121:9200'
+  - job_name: 'Acq-new-batch'
+    static_configs:
+      - targets:
+        - '192.168.63.65:9200'
+
+  - job_name: 'Datalake-o1master'
+    static_configs:
+      - targets:
+        - '192.168.61.155:9200'
+
+  - job_name: 'Datalake-1worker'
+    static_configs:
+      - targets:
+        - '192.168.61.156:9200'
+
+  - job_name: 'Datalake-2worker'
+    static_configs:
+      - targets:
+        - '192.168.61.155:9200'
+
+  - job_name: 'psp-sales-demo'
+    static_configs:
+      - targets:
+        - '192.168.61.94:9200'
+
+  - job_name: 'psp-sales'
+    static_configs:
+      - targets:
+        - '192.168.61.95:9200'
+
+  - job_name: 'psp-sales-batch'
+    static_configs:
+      - targets:
+        - '192.168.61.97:9200'
+
+  - job_name: 'psp-batch'
+    static_configs:
+      - targets:
+        - '192.168.61.98:9200'
+
+  - job_name: 'blackbox'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]  # Look for a HTTP 200 response.
+    static_configs:
+      - targets:
+        - https://websitename 
+    relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_target
+    - source_labels: [__param_target]
+      target_label: instance
+    - target_label: __address__
+      replacement: 192.168.61.186:9115  # The Blackbox Exporter's real hostname:port.
+
+
+
+  # - job_name: 'blackbox'
+  #   metrics_path: /probe
+  #   params:
+  #     module: [http_2xx]
+  #   static_configs:
+  #     - targets:
+  #         - https://master-slave-jenkins.toucanint.com/
+  #         - https://lyra-jenkins.toucanint.com/
+  #         - https://psp-dev-jenkins.toucanint.com/
+  #       labels:
+  #         auth_jenkins1: "c2FuYXRoLnB1bGlwYXRpOldlbGNvbWVAMTIz"
+  #         auth_jenkins2: "IHZlbmthdGVzaC5wYWxsaTpDbG91ZCQxMjM0QEBAQA=="
+  #         auth_jenkins3: "dGhhcnVuLm1hZGFkaGE6Wm9yb0AwMDc="
+
+  #   relabel_configs:
+  #     - source_labels: [__param_target]
+  #       regex: "https://lyra-jenkins.toucanint.com/.*"
+  #       replacement: "c2FuYXRoLnB1bGlwYXRpOldlbGNvbWVAMTIz"
+  #       target_label: Authorization
+
+  #     - source_labels: [__param_target]
+  #       regex: "https://jenkins2.toucanint.com/.*"
+  #       replacement: "IHZlbmthdGVzaC5wYWxsaTpDbG91ZCQxMjM0QEBAQA=="
+  #       target_label: Authorization
+
+  #     - source_labels: [__param_target]
+  #       regex: "https://psp-dev-jenkins.toucanint.com/.*"
+  #       replacement: "dGhhcnVuLm1hZGFkaGE6Wm9yb0AwMDc="
+  #       target_label: Authorization
+
+  
+  # - job_name: 'master_slave'
+  #   metrics_path: /probe
+  #   params:
+  #     module: [master_slave_]
+  #   static_configs:
+  #     - targets:
+  #       - https://master-slave-jenkins.toucanint.com/
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: __param_target
+  #     - source_labels: [__param_target]
+  #       target_label: instance
+  #     - target_label: __address__
+  #       replacement: 192.168.61.186:9115
+
+  # - job_name: 'jenkins_lyra'
+  #   metrics_path: /probe
+  #   params:
+  #     module: [jenkins_lyra]
+  #   static_configs:
+  #     - targets:
+  #       - https://lyra-jenkins.toucanint.com
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: __param_target
+  #     - source_labels: [__param_target]
+  #       target_label: instance
+  #     - target_label: __address__
+  #       replacement: l192.168.61.186:9115
+
+  
+
+
+
+
+ 
+
+
+
+
+
+
+  # - job_name: 'blackbox'
+  #   metrics_path: /probe
+  #   params:
+  #     module: [http_2xx]  # Look for a HTTP 200 response.
+  #   static_configs:
+  #     - targets:
+  #       - https://cust-onb-qa.toucanint.com/#/    # Target to probe with http.
+  #       - https://cards-qa.toucanint.com/#/   # Target to probe with https.
+  #       - https://cust-onb-dev.toucanint.com/#/    # Target to probe with http.
+  #       - https://cards-dev.toucanint.com/#/   # Target to probe with https.
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: __param_target
+  #     - source_labels: [__param_target]
+  #       target_label: instance
+  #     - target_label: __address__
+  #       replacement: 192.168.61.119:30115  # The blackbox exporter's real hostname:port.
+  # - job_name: 'issuing_black_dev'
+  #   metrics_path: /probe
+  #   params:
+  #     module: [http_2xx]  # Look for a HTTP 200 response.
+  #   static_configs:
+  #     - targets:
+  #       - https://cust-onb-dev.toucanint.com/#/    # Target to probe with http.
+  #       - https://cards-dev.toucanint.com/#/   # Target to probe with https.
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: __param_target
+  #     - source_labels: [__param_target]
+  #       target_label: instance
+  #     - target_label: __address__
+  #       replacement: 192.168.61.131:30115  # The blackbox exporter's real hostname:port.
+  # - job_name: 'Acq_black_dev'
+  #   metrics_path: /probe
+  #   params:
+  #     module: [http_2xx]  # Look for a HTTP 200 response.
+  #   static_configs:
+  #     - targets:
+  #       - ops-develop.acq.toucanint.com
+  #       - merchant-develop.acq.toucanint.com
+  #       - unittest-develop.acq.toucanint.com
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: __param_target
+  #     - source_labels: [__param_target]
+  #       target_label: instance
+  #     - target_label: __address__
+  #       replacement: 192.168.61.56:30115  # The blackbox exporter's real hostname:port.
+  # - job_name: 'Acq_black_qa'
+  #   metrics_path: /probe
+  #   params:
+  #     module: [http_2xx]  # Look for a HTTP 200 response.
+  #   static_configs:
+  #     - targets:
+  #       - ops-qa.acq.toucanint.com
+  #       - merchant-qa.acq.toucanint.com
+  #       - unittest-qa.acq.toucanint.com
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: __param_target
+  #     - source_labels: [__param_target]
+  #       target_label: instance
+  #     - target_label: __address__
+  #       replacement: 192.168.61.60:30115  # The blackbox exporter's real hostname:port.
+  # - job_name: 'Acq_black_perf'
+  #   metrics_path: /probe
+  #   params:
+  #     module: [http_2xx]  # Look for a HTTP 200 response.
+  #   static_configs:
+  #     - targets:
+  #       - ops-perf.acq.toucanint.com
+  #       - merchant-perf.acq.toucanint.com
+  #       - unittest-perf.acq.toucanint.com
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: __param_target
+  #     - source_labels: [__param_target]
+  #       target_label: instance
+  #     - target_label: __address__
+  #       replacement: 192.168.61.67:30115  # The blackbox exporter's real hostname:port.
+  # - job_name: 'lyra_black'
+  #   metrics_path: /probe
+  #   params:
+  #     module: [http_2xx]  # Look for a HTTP 200 response.
+  #   static_configs:
+  #     - targets:
+  #       - ops-dev.acq.toucanint.com
+  #       - merchant-dev.acq.toucanint.com
+  #       - unittest-dev.acq.toucanint.com
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: __param_target
+  #     - source_labels: [__param_target]
+  #       target_label: instance
+  #     - target_label: __address__
+  #       replacement: 192.168.61.30:30115  # The blackbox exporter's real hostname:port.
+  # - job_name: 'PSP_black_qa'
+  #   metrics_path: /probe
+  #   params:
+  #     module: [http_2xx]  # Look for a HTTP 200 response.
+  #   static_configs:
+  #     - targets:
+  #       - ops-pspqa.toucanint.com
+  #       - merchant-pspqa.toucanint.com
+  #       - unittest-pspqa.toucanint.com
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: __param_target
+  #     - source_labels: [__param_target]
+  #       target_label: instance
+  #     - target_label: __address__
+  #       replacement: 192.168.63.156:30115  # The blackbox exporter's real hostname:port.
+  # - job_name: 'Acq_black_C&S'
+  #   metrics_path: /probe
+  #   params:
+  #     module: [http_2xx]  # Look for a HTTP 200 response.
+  #   static_configs:
+  #     - targets:
+  #       - ops.acq.toucanint.com
+  #       - merchant.acq.toucanint.com
+  #       - unittest.acq.toucanint.com
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: __param_target
+  #     - source_labels: [__param_target]
+  #       target_label: instance
+  #     - target_label: __address__
+  #       replacement: 192.168.63.55:30115  # The blackbox exporter's real hostname:port.
+
+
+  # - job_name: 'issuing_blackexporter_dev'  # collect blackbox exporter's operational metrics.
+  #   static_configs:
+  #     - targets: ['192.168.61.131:30115']
+  # - job_name: 'Acq_blackexporter_dev'  # collect blackbox exporter's operational metrics.
+  #   static_configs:
+  #     - targets: ['192.168.61.56:30115']
+  # - job_name: 'Acq_blackexporter_qa'  # collect blackbox exporter's operational metrics.
+  #   static_configs:
+  #     - targets: ['192.168.61.60:30115']
+  # - job_name: 'Acq_blackexporter_perf'  # collect blackbox exporter's operational metrics.
+  #   static_configs:
+  #     - targets: ['192.168.61.67:30115']
+  # - job_name: 'lyra_blackexporter'  # collect blackbox exporter's operational metrics.
+  #   static_configs:
+  #     - targets: ['192.168.61.30:30115']
+  # - job_name: 'PSP_blackexporter_qa'  # collect blackbox exporter's operational metrics.
+  #   static_configs:
+  #     - targets: ['192.168.63.156:30115']
+  # - job_name: 'Acq_blackexporter_C&S'  # collect blackbox exporter's operational metrics.
+  #   static_configs:
+  #     - targets: ['192.168.63.55:30115']
