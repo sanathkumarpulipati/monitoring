@@ -1,0 +1,14 @@
+groups:
+- name: pod.rules
+  rules:
+  - alert: PodNotRunning
+    expr: |
+      sum by (namespace, pod, job, instance) (
+        kube_pod_status_phase{phase=~"Pending|Failed|Unknown"}
+      ) > 0      
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Pod {{ $labels.pod }} (Job: {{ $labels.job }}) not running"
+      description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} on instance {{ $labels.instance }} for job {{ $labels.job }} has been in non-running state for more than 2 minutes"
