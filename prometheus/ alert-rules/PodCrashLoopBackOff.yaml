@@ -1,0 +1,14 @@
+groups:
+- name: pod.rules
+  rules:
+  - alert: PodCrashLoopBackOff
+    expr: |
+      sum by (namespace, pod, job, instance) (
+        kube_pod_container_status_waiting_reason{reason="CrashLoopBackOff"}
+      ) > 0      
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Pod {{ $labels.pod }} (Job: {{ $labels.job }}) in CrashLoopBackOff"
+      description: "Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} on instance {{ $labels.instance }} for job {{ $labels.job }} has been in CrashLoopBackOff state for more than 2 minutes"
