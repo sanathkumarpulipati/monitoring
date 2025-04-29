@@ -1,0 +1,97 @@
+
+# yaml file should be in this location /etc/kubernetes/manifests
+apiVersion: v1
+kind: Pod
+metadata:
+  name: x509-certificate-exporter
+  namespace: kube-system
+  labels:
+    app: x509-certificate-exporter  # Added label to match service selector
+spec:
+  containers:
+    - name: x509-certificate-exporter
+      image: quay.io/enix/x509-certificate-exporter:latest
+      args:
+        - "--watch-file=/etc/kubernetes/pki/apiserver.crt"
+        - "--watch-file=/etc/kubernetes/pki/apiserver-etcd-client.crt"
+        - "--watch-file=/etc/kubernetes/pki/apiserver-kubelet-client.crt"
+        - "--watch-file=/etc/kubernetes/pki/ca.crt"
+        - "--watch-file=/etc/kubernetes/pki/etcd/ca.crt"
+        - "--watch-file=/etc/kubernetes/pki/etcd/peer.crt"
+        - "--watch-file=/etc/kubernetes/pki/etcd/server.crt"
+        - "--watch-file=/etc/kubernetes/pki/etcd/healthcheck-client.crt"
+        - "--watch-file=/etc/kubernetes/pki/front-proxy-ca.crt"
+        - "--watch-file=/etc/kubernetes/pki/front-proxy-client.crt"
+        - "--watch-file=/etc/kubernetes/admin.conf"
+        - "--watch-file=/etc/kubernetes/controller-manager.conf"
+        - "--watch-file=/etc/kubernetes/scheduler.conf"
+      ports:
+        - containerPort: 9793
+      volumeMounts:
+        - name: pki-volume
+          mountPath: /etc/kubernetes/pki
+          readOnly: true
+  volumes:
+    - name: pki-volume
+      hostPath:
+        path: /etc/kubernetes/pki
+        type: Directory
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: ""
+  tolerations:
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+
+
+# Another method above is not working
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: x509-certificate-exporter
+  namespace: kube-system
+  labels:
+    app: x509-certificate-exporter
+spec:
+  containers:
+  - name: x509-certificate-exporter
+    image: quay.io/enix/x509-certificate-exporter:latest
+    args:
+    - "--watch-file=/etc/kubernetes/pki/apiserver.crt"
+    - "--watch-file=/etc/kubernetes/pki/apiserver-etcd-client.crt"
+    - "--watch-file=/etc/kubernetes/pki/apiserver-kubelet-client.crt"
+    - "--watch-file=/etc/kubernetes/pki/ca.crt"
+    - "--watch-file=/etc/kubernetes/pki/etcd/ca.crt"
+    - "--watch-file=/etc/kubernetes/pki/etcd/peer.crt"
+    - "--watch-file=/etc/kubernetes/pki/etcd/server.crt"
+    - "--watch-file=/etc/kubernetes/pki/etcd/healthcheck-client.crt"
+    - "--watch-file=/etc/kubernetes/pki/front-proxy-ca.crt"
+    - "--watch-file=/etc/kubernetes/pki/front-proxy-client.crt"
+    - "--watch-file=/etc/kubernetes/admin.conf"
+    - "--watch-file=/etc/kubernetes/controller-manager.conf"
+    - "--watch-file=/etc/kubernetes/scheduler.conf"
+    ports:
+    - containerPort: 9793
+    volumeMounts:
+    - name: kubernetes-dir
+      mountPath: /etc/kubernetes
+      readOnly: true
+  volumes:
+  - name: kubernetes-dir
+    hostPath:
+      path: /etc/kubernetes
+      type: Directory
+  nodeSelector:
+    node-role.kubernetes.io/control-plane: ""
+  tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+
+
+#     error -
+  
+# time=2025-01-29T11:52:02.566Z level=WARN msg="failed to parse \"/etc/kubernetes/admin.conf\": readlink /etc/kubernetes/admin.conf: no such file or directory"
+# time=2025-01-29T11:52:02.566Z level=WARN msg="failed to parse \"/etc/kubernetes/controller-manager.conf\": readlink /etc/kubernetes/controller-manager.conf: no such file or directory"
+# time=2025-01-29T11:52:02.566Z level=WARN msg="failed to parse \"/etc/kubernetes/scheduler.conf\": readlink /etc/kubernetes/scheduler.conf: no such file or directory"
