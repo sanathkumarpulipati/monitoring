@@ -1,0 +1,11 @@
+groups:
+- name: VM-Down-Alert
+  rules:
+  - alert: InstanceDown
+    expr: up == 0
+    for: 1m
+    labels:
+      severity: "critical"
+    annotations:
+      summary: "{{ $labels.job }}-{{ $labels.instance }} has been down for more than 1 minute."
+
